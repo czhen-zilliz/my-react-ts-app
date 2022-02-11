@@ -6,6 +6,7 @@ import {
   useRecoilState,
   useRecoilValue,
   useSetRecoilState,
+  useRecoilValueLoadable,
 } from "recoil";
 import { todoListState, todoListFilterState } from "@/atom";
 import {
@@ -26,12 +27,7 @@ export default function TodoList() {
       <TodoItemCreator />
 
       {todoList.map((todoItem: any) => (
-        <React.Suspense
-          key={`susp-${todoItem.id}`}
-          fallback={<div>加载中。。。</div>}
-        >
-          <TodoItem item={todoItem} key={todoItem.id} />
-        </React.Suspense>
+        <TodoItem item={todoItem} key={todoItem.id} />
       ))}
     </>
   );
@@ -82,45 +78,53 @@ export function TodoItemCreator() {
 function TodoItem({ item }: any) {
   const [todoList, setTodoList]: [any, any] = useRecoilState(todoListState);
   const index = todoList.findIndex((listItem: any) => listItem === item);
-  const itemData = item.async
-    ? useRecoilValue(toDoItemQueryAsync(item))
-    : useRecoilValue(toDoItemQuerySync(item));
+  const itemDataLodable = item.async
+    ? useRecoilValueLoadable(toDoItemQueryAsync(item))
+    : useRecoilValueLoadable(toDoItemQuerySync(item));
 
-  const editItemText = ({ target: { value } }: any) => {
-    const newList = replaceItemAtIndex(todoList, index, {
-      ...itemData,
-      text: value,
-    });
+  switch (itemDataLodable.state) {
+    case "hasValue":
+      const itemData = itemDataLodable.contents;
+      const editItemText = ({ target: { value } }: any) => {
+        const newList = replaceItemAtIndex(todoList, index, {
+          ...itemData,
+          text: value,
+        });
 
-    setTodoList(newList);
-  };
+        setTodoList(newList);
+      };
 
-  const toggleItemCompletion = () => {
-    const newList = replaceItemAtIndex(todoList, index, {
-      ...itemData,
-      isComplete: !itemData.isComplete,
-    });
+      const toggleItemCompletion = () => {
+        const newList = replaceItemAtIndex(todoList, index, {
+          ...itemData,
+          isComplete: !itemData.isComplete,
+        });
 
-    setTodoList(newList);
-  };
+        setTodoList(newList);
+      };
 
-  const deleteItem = () => {
-    const newList = removeItemAtIndex(todoList, index);
+      const deleteItem = () => {
+        const newList = removeItemAtIndex(todoList, index);
 
-    setTodoList(newList);
-  };
+        setTodoList(newList);
+      };
 
-  return (
-    <div>
-      <input type="text" value={itemData.text} onChange={editItemText} />
-      <input
-        type="checkbox"
-        checked={itemData.isComplete}
-        onChange={toggleItemCompletion}
-      />
-      <button onClick={deleteItem}>X</button>
-    </div>
-  );
+      return (
+        <div>
+          <input type="text" value={itemData.text} onChange={editItemText} />
+          <input
+            type="checkbox"
+            checked={itemData.isComplete}
+            onChange={toggleItemCompletion}
+          />
+          <button onClick={deleteItem}>X</button>
+        </div>
+      );
+    case "loading":
+      return <div>加载中……</div>;
+    case "hasError":
+      throw itemDataLodable.contents;
+  }
 }
 
 function TodoListFilters() {
