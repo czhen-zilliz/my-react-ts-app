@@ -11,6 +11,7 @@ import {
 } from "recoil";
 import App0 from "@/pages/Page0/Index";
 import App1 from "@/pages/Page1/Index";
+import Users from "@/pages/Users/Index";
 import NotFound from "@/pages/NotFount/Index";
 
 function DebugObserver() {
@@ -33,6 +34,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<App0 />} />
           <Route path="/1" element={<App1 />} />
+          <Route path="/users" element={<Users />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

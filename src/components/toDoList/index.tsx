@@ -78,13 +78,13 @@ export function TodoItemCreator() {
 function TodoItem({ item }: any) {
   const [todoList, setTodoList]: [any, any] = useRecoilState(todoListState);
   const index = todoList.findIndex((listItem: any) => listItem === item);
-  const itemDataLodable = item.async
+  const itemDataLoadable = item.async
     ? useRecoilValueLoadable(toDoItemQueryAsync(item))
     : useRecoilValueLoadable(toDoItemQuerySync(item));
 
-  switch (itemDataLodable.state) {
+  switch (itemDataLoadable.state) {
     case "hasValue":
-      const itemData = itemDataLodable.contents;
+      const itemData = itemDataLoadable.contents;
       const editItemText = ({ target: { value } }: any) => {
         const newList = replaceItemAtIndex(todoList, index, {
           ...itemData,
@@ -123,7 +123,7 @@ function TodoItem({ item }: any) {
     case "loading":
       return <div>加载中……</div>;
     case "hasError":
-      throw itemDataLodable.contents;
+      throw itemDataLoadable.contents;
   }
 }
 

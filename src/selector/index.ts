@@ -6,7 +6,12 @@ import {
   useRecoilState,
   useRecoilValue,
 } from "recoil";
-import { counterState, todoListState, todoListFilterState } from "@/atom";
+import {
+  counterState,
+  todoListState,
+  todoListFilterState,
+  userListState,
+} from "@/atom";
 
 export const counterSizeState = selector({
   key: "counterSizeState", // unique ID (with respect to other atoms/selectors)
@@ -86,4 +91,16 @@ export const toDoItemQueryAsync = selectorFamily({
         text: `Async-${item.text}`,
       };
     },
+});
+
+// Query user list from a web API
+export const userListQueryAsync = selector({
+  key: "userListQueryAsync",
+  get: async ({ get }) => {
+    const data = await fetch("https://jsonplaceholder.typicode.com/users").then(
+      (response) => response.json()
+    );
+    await sleep(() => {});
+    return data;
+  },
 });
