@@ -11,7 +11,7 @@ import {
 import { User } from "./user";
 import { UsersService, UserCreationParams } from "./usersService";
 
-@Route("users")
+@Route("api/users")
 export class UsersController extends Controller {
   @Get("{userId}")
   public async getUser(
